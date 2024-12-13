@@ -20,6 +20,9 @@
 
 Welcome to the Middle-earth Walking Tracker! This program helps you visualize and track your walking or running progress on a map of Middle-earth. It's designed to motivate and inspire users by allowing them to embark on a virtual journey through the iconic locations from J.R.R. Tolkien's legendary universe.
 
+![image](https://github.com/user-attachments/assets/4f6b51f2-8a7a-4988-930d-3fd244ad0fb6)
+
+
 ## Features
 
 - **Interactive Map**: An engaging, zoomable, and pannable map of Middle-earth.

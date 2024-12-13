@@ -20,6 +20,8 @@
 
 Welcome to the Middle-earth Walking Tracker! This program helps you visualize and track your walking or running progress on a map of Middle-earth. It's designed to motivate and inspire users by allowing them to embark on a virtual journey through the iconic locations from J.R.R. Tolkien's legendary universe.
 
+The goal of this project is to provide a free and customizable activity tracker themed around the journey of the Fellowship of the Ring. It is meant to be a simple alternative to other activity trackers currently out there. I honestly have no clue whether or not this exact thing exists in this form already. I have enjoyed working on this project greatly and would love for other people to enjoy it to.
+
 ![image](https://github.com/user-attachments/assets/4f6b51f2-8a7a-4988-930d-3fd244ad0fb6)
 
 
@@ -28,9 +30,10 @@ Welcome to the Middle-earth Walking Tracker! This program helps you visualize an
 - **Interactive Map**: An engaging, zoomable, and pannable map of Middle-earth.
 - **Distance Tracking**: Enter your daily walking or running distance to progress on your journey.
 - **Save and Load Progress**: Save your progress and load it later to continue your adventure.
-- **Day Tracking**: Track the number of days since you started your journey.
+- **Day Tracking**: Track the number of days since you started your journey. (not yet)
 - **Visual Indicators**: See your path, current location, and progress on the map.
 - **Responsive UI**: User-friendly interface with easy-to-use controls.
+- **Coordinate Debugging**: One of the most useful tools for adding new coordinates is the coordinate debugging tool I added. It is on by default when you start the program. Essentially it just shows you the coordinates as you move the mouse around the map. This makes adding new locations relatively simple and accurate.
 
 ## How It Works
 
@@ -38,7 +41,7 @@ Welcome to the Middle-earth Walking Tracker! This program helps you visualize an
 2. **Distance Entry**: Users enter the distance they walked or ran into the input field, and the program updates their total distance covered.
 3. **Save Progress**: Users can save their progress by entering a username. This saves the total distance and start date in an SQLite database.
 4. **Load Progress**: Users can load their saved progress by selecting their username from a list. This retrieves the saved data and updates the map and distance accordingly.
-5. **Day Tracking**: The program tracks the number of days elapsed since the user's journey started.
+5. **Day Tracking**: The program tracks the number of days elapsed since the user's journey started. (currently working on this)
 
 ## Scaling and Distance Calculation
 
@@ -60,9 +63,11 @@ The total distance covered by the user is calculated by summing up the daily dis
 
 ## Things In Progress
 
-- **Improved Location Markers**: Enhancing the visibility and design of location markers on the map.
+- **Improved Location Markers and path**: The path laid out in this program is a work in progress. It hits most of the points of interest the Fellowship/Frodo/Sam went through. But could either be more accurate and/or less straight line.
 - **Refined Distance Updates**: Optimizing the distance entry and update mechanism for smoother performance.
 - **Error Handling**: Implementing more robust error handling to manage unexpected inputs and scenarios.
+- **Database**: This is the most recent addition to the program and mostly works. But future work is needed.
+- **Simplifying**: I have the program broken up into several files to help with making it more modular. But more work is needed as the main tracker.py file is still quite large.
 
 ## Future Features
 
@@ -73,11 +78,15 @@ The total distance covered by the user is calculated by summing up the daily dis
 - **Light RPG Gameplay Elements**: Adding optional light RPG-style gameplay elements.
 - **More Accurate Fellowship Path**: Mapping a more accurate path followed by the Fellowship.
 - **Total Distance**: Tracking the total distance, which is approximately 1800 miles.
+- **Why this map**: The map is currently just a JPEG, and I know that  is not ideal. But it works and is fine for now. Ideally the map would be an SVG or something but I couldn't get it to work. Nor do I want to use something like an actual map with an overlay. 
 
 ## Current Bugs
 
 - **Resetting Progress**: Resetting progress can sometimes behave unexpectedly.
 - **Location Colors**: Location colors may not always update correctly.
+- **Saving and Loading**: There is still a lot of work to do here as the database portion of this is very rudimentary. But it accurately saves and loads progress and can handle multiple users.
+- **Input Validation**: I haven't spent much time trying to catch input errors or provide much in the way of input validation. It would be very easy for someone to break this.
+- **MORE**: there are LOTS more bugs and things that don't work. In fact, the two above this are almost perfectly functional compared to some things. I will update those soon.
 
 ## Adjustments and Customization
 

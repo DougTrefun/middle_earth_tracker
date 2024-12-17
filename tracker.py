@@ -4,6 +4,7 @@ from PIL import Image, ImageTk
 import os
 import database
 from path_utils import get_path_and_distances, scale_coordinates
+from datetime import datetime
 
 class MiddleEarthTracker:
     def __init__(self, root):
@@ -21,7 +22,8 @@ class MiddleEarthTracker:
         file_menu.add_command(label="Save", command=self.save_progress)
         file_menu.add_command(label="Load", command=self.load_progress)
         file_menu.add_separator()
-        file_menu.add_command(label="Exit", command=self.root.quit)
+        file_menu.add_command(label="Exit", command=self.close_application)
+
 
         options_menu = Menu(self.menu_bar, tearoff=0)
         self.menu_bar.add_cascade(label="Options", menu=options_menu)
@@ -78,6 +80,9 @@ class MiddleEarthTracker:
         self.current_user_label = tk.Label(status_frame, text="Current User: None", bg="white")
         self.current_user_label.pack(side=tk.LEFT, padx=10, pady=5, anchor="w")
 
+        self.last_entry_label = tk.Label(status_frame, text="Date of Last Entry: N/A", bg="white")
+        self.last_entry_label.pack(side=tk.LEFT, padx=10, pady=5, anchor="w")
+
         self.date_time_label = tk.Label(status_frame, text="", bg="white")
         self.date_time_label.pack(side=tk.LEFT, padx=10, pady=5, anchor="w")
         self.update_time()
@@ -100,6 +105,12 @@ class MiddleEarthTracker:
 
         self.reset_counter = 0
         self.last_location_index = -1
+
+        self.start_date = None  # Initialize start_date to None
+        self.update_elapsed_days()  # Start updating the elapsed days
+
+        # Bind the window close event to the close_application method
+        self.root.protocol("WM_DELETE_WINDOW", self.close_application)
 
     def draw_full_path(self):
         scaled_path = scale_coordinates(self.path, self.original_size, self.new_size)
@@ -146,6 +157,7 @@ class MiddleEarthTracker:
 
     def zoom_out(self, event=None):
         """Zoom out of the image."""
+        print("Zooming out")
         self.image_scale /= 1.1
         self.apply_zoom()
 
@@ -184,6 +196,7 @@ class MiddleEarthTracker:
                 color = "yellow"
             else:
                 color = "gray"
+            self.canvas.create_oval
             self.canvas.create_oval(x - 5, y - 5, x + 5, y + 5, fill=color, outline="black", tags=("location", f"location_{i}"))
             distance_covered += self.distances[i] if i < len(self.distances) else 0
 
@@ -291,14 +304,23 @@ class MiddleEarthTracker:
         """Save the current progress to the database."""
         if not hasattr(self, 'current_user'):
             self.current_user = simpledialog.askstring("Save Progress", "Enter user name:")
+            if self.current_user:
+                self.start_date = datetime.now()  # Set the start date if not set
         if self.current_user:
             user_id = database.get_user_id(self.conn, self.current_user)
             if user_id is None:
                 print(f"Adding new user: {self.current_user}")
                 user_id = database.add_user(self.conn, self.current_user, str(self.total_distance))
+                self.start_date = datetime.now()  # Set the start date
             else:
                 print(f"User found: {self.current_user} with user_id: {user_id}")
                 database.save_progress(self.conn, user_id, str(self.total_distance))
+                # Load the start date and last entry date from the database if they exist
+                start_date_str, last_entry_date = database.load_start_and_last_entry_dates(self.conn, user_id)
+                if start_date_str:
+                    self.start_date = datetime.strptime(start_date_str, "%m/%d/%Y %H:%M")
+                if last_entry_date:
+                    self.last_entry_label.config(text=f"Date of Last Entry: {last_entry_date}")
             self.display_current_user()
 
     def load_progress(self):
@@ -339,6 +361,14 @@ class MiddleEarthTracker:
                         self.update_path_and_locations()
                         self.check_next_location()
                         self.display_current_user()
+
+                        # Load the start date and last entry date
+                        start_date_str, last_entry_date = database.load_start_and_last_entry_dates(self.conn, user_id)
+                        if start_date_str:
+                            self.start_date = datetime.strptime(start_date_str, "%m/%d/%Y %H:%M")
+                        if last_entry_date:
+                            self.last_entry_label.config(text=f"Date of Last Entry: {last_entry_date}")
+                        self.update_elapsed_days()
                     else:
                         print("No progress found for the specified user.")
                 else:
@@ -352,6 +382,14 @@ class MiddleEarthTracker:
         if hasattr(self, 'current_user'):
             self.current_user_label.config(text=f"Current User: {self.current_user}")
 
+    def update_elapsed_days(self):
+        """Update the days elapsed since the start date."""
+        if self.start_date:
+            now = datetime.now()
+            elapsed_days = (now - self.start_date).days
+            self.elapsed_days_label.config(text=f"Days Elapsed: {elapsed_days}")
+        self.root.after(86400000, self.update_elapsed_days)  # Update every day
+
     def show_about(self):
         """Show the about dialog."""
         pass  # Implement the FAQ/About dialog here
@@ -360,15 +398,19 @@ class MiddleEarthTracker:
         """Close the SQLite connection."""
         self.conn.close()
 
+    def close_application(self):
+        """Close the application and SQLite connection."""
+        self.close_connection()
+        self.root.destroy()
+
     def update_time(self):
         """Update the date and time on the label."""
-        from datetime import datetime
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        now = datetime.now().strftime("%m/%d/%Y %H:%M")
         self.date_time_label.config(text=f"Current Date and Time: {now}")
         self.root.after(1000, self.update_time)  # Update the time every second
 
 if __name__ == "__main__":
     root = tk.Tk()
     app = MiddleEarthTracker(root)
-    root.protocol("WM_DELETE_WINDOW", app.close_connection)
+    root.protocol("WM_DELETE_WINDOW", app.close_application)
     root.mainloop()
